@@ -14,30 +14,26 @@
           <label for="version-select">Version</label>
           <select id="version-select"></select>
         </div>
-        <header>
-          <h1 id="wizard-title"></h1>
-          <h2 id="step-title"></h2>
-        </header>
-        <p id="step-text"></p>
-        <a id="step-link" target="_blank" rel="noopener noreferrer"></a>
+        <section id="wizard-panel">
+          <header>
+            <h1 id="wizard-title"></h1>
+            <h2 id="step-title"></h2>
+          </header>
+          <p id="step-text"></p>
+          <a id="step-link" target="_blank" rel="noopener noreferrer"></a>
 
-        <nav>
-          <button id="back" type="button">Back</button>
-          <button id="help-toggle" type="button">
-            I encountered a problem and need help
-          </button>
-          <button id="next" type="button">I'm ok to move on</button>
-        </nav>
-        <div id="help" hidden>
-          <div id="video"></div>
-          <a
-            id="support-link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Schedule support call
-          </a>
-        </div>
+          <nav>
+            <button id="back" type="button">Back</button>
+            <button id="help-toggle" type="button">
+              I encountered a problem and need help
+            </button>
+            <button id="next" type="button">I'm ok to move on</button>
+          </nav>
+          <div id="help" hidden>
+            <div id="video"></div>
+          </div>
+        </section>
+        <section id="summary" hidden></section>
       </main>
     </div>
     <script src="with-form.js"></script>

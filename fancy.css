@@ -159,11 +159,11 @@ button {
 
 nav button {
   min-height: 56px;
-  height: 56px;
   flex: 0 1 auto;
   padding: 0 14px;
   text-align: center;
   line-height: 1.2;
+  align-self: stretch;
 }
 
 textarea {

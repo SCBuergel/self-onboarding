@@ -7,9 +7,10 @@ const stepTitleEl = document.getElementById("step-title");
 const stepTextEl = document.getElementById("step-text");
 const stepLinkEl = document.getElementById("step-link");
 const helpToggleEl = document.getElementById("help-toggle");
+const wizardPanelEl = document.getElementById("wizard-panel");
+const summaryEl = document.getElementById("summary");
 const helpEl = document.getElementById("help");
 const videoEl = document.getElementById("video");
-const supportLinkEl = document.getElementById("support-link");
 const backBtn = document.getElementById("back");
 const nextBtn = document.getElementById("next");
 
@@ -23,6 +24,7 @@ let currentStepIndex = 0;
 let eventsAttached = false;
 let clickLog = [];
 let isFinished = false;
+let sessionVersion = null;
 
 function getVersionParam() {
   const params = new URLSearchParams(window.location.search);
@@ -81,7 +83,13 @@ function renderSteps() {
     }
     item.addEventListener("click", () => {
       if (isFinished) {
-        return;
+        isFinished = false;
+        if (summaryEl) {
+          summaryEl.hidden = true;
+        }
+        if (wizardPanelEl) {
+          wizardPanelEl.hidden = false;
+        }
       }
       currentStepIndex = index;
       logClick("Step selected");
@@ -109,10 +117,9 @@ function renderStepContent(step) {
   resetHelpState();
 
   if (step.help && step.help.support_url) {
-    supportLinkEl.href = step.help.support_url;
-    supportLinkEl.hidden = false;
+    // no-op: support link removed in this variant
   } else {
-    supportLinkEl.hidden = true;
+    // no-op
   }
 
   backBtn.disabled = currentStepIndex === 0;
@@ -178,17 +185,12 @@ function attachEvents() {
     finishWizard("critical_problem");
   });
 
-  supportLinkEl.addEventListener("click", () => {
-    logClick("Support link");
-  });
-
   if (versionSelectEl) {
     versionSelectEl.addEventListener("change", () => {
       const selected = versionSelectEl.value;
       if (!selected || isFinished) {
         return;
       }
-      logClick(`Version changed to ${selected}`);
       loadVersion(selected, true);
     });
   }
@@ -238,6 +240,14 @@ function loadVersion(version, updateQueryParam) {
       config = loaded;
       currentStepIndex = 0;
       isFinished = false;
+      clickLog = [];
+      sessionVersion = loaded.version || version;
+      if (summaryEl) {
+        summaryEl.hidden = true;
+      }
+      if (wizardPanelEl) {
+        wizardPanelEl.hidden = false;
+      }
       render();
       if (versionSelectEl) {
         versionSelectEl.value = version;
@@ -315,6 +325,17 @@ function finishWizard(reason) {
   logTable.appendChild(thead);
 
   const tbody = document.createElement("tbody");
+  if (sessionVersion) {
+    const versionRow = document.createElement("tr");
+    const versionLabel = document.createElement("td");
+    versionLabel.textContent = "Version";
+    const versionValue = document.createElement("td");
+    versionValue.textContent = sessionVersion;
+    const versionSpacer = document.createElement("td");
+    versionSpacer.textContent = "";
+    versionRow.append(versionLabel, versionValue, versionSpacer);
+    tbody.appendChild(versionRow);
+  }
   clickLog.forEach((entry) => {
     const row = document.createElement("tr");
     const stepCell = document.createElement("td");
@@ -382,8 +403,14 @@ function finishWizard(reason) {
     disclaimer
   );
 
-  contentEl.innerHTML = "";
-  contentEl.appendChild(summary);
+  if (summaryEl) {
+    summaryEl.innerHTML = "";
+    summaryEl.appendChild(summary);
+    summaryEl.hidden = false;
+  }
+  if (wizardPanelEl) {
+    wizardPanelEl.hidden = true;
+  }
 }
 
 function init() {
@@ -394,6 +421,7 @@ function init() {
       updateVersionOptions(versions);
       const requested = getVersionParam();
       const version = resolveVersion(versions, requested);
+      sessionVersion = version;
       if (versionSelectEl) {
         versionSelectEl.value = version;
       }
