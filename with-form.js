@@ -2,10 +2,12 @@ const stepsEl = document.getElementById("steps");
 const contentEl = document.getElementById("content");
 let versionPickerEl = document.getElementById("version-picker");
 let versionSelectEl = document.getElementById("version-select");
+const headerEl = contentEl.querySelector("header");
 const wizardTitleEl = document.getElementById("wizard-title");
 const stepTitleEl = document.getElementById("step-title");
 const stepTextEl = document.getElementById("step-text");
 const stepLinkEl = document.getElementById("step-link");
+const navEl = contentEl.querySelector("nav");
 const helpToggleEl = document.getElementById("help-toggle");
 const helpEl = document.getElementById("help");
 const videoEl = document.getElementById("video");
@@ -23,6 +25,7 @@ let currentStepIndex = 0;
 let eventsAttached = false;
 let clickLog = [];
 let isFinished = false;
+let summaryEl = null;
 
 function getVersionParam() {
   const params = new URLSearchParams(window.location.search);
@@ -81,7 +84,7 @@ function renderSteps() {
     }
     item.addEventListener("click", () => {
       if (isFinished) {
-        return;
+        exitSummary(index);
       }
       currentStepIndex = index;
       logClick("Step selected");
@@ -125,6 +128,46 @@ function render() {
   }
   renderSteps();
   renderStepContent(config.steps[currentStepIndex]);
+}
+
+function setSummaryVisibility(visible) {
+  const elements = [
+    versionPickerEl,
+    headerEl,
+    stepTextEl,
+    stepLinkEl,
+    navEl,
+    helpEl,
+  ];
+  elements.forEach((el) => {
+    if (!el) {
+      return;
+    }
+    if (visible) {
+      if (el.dataset.prevDisplay === undefined) {
+        el.dataset.prevDisplay = el.style.display || "";
+      }
+      el.style.display = "none";
+    } else {
+      const previous = el.dataset.prevDisplay ?? "";
+      el.style.display = previous;
+      delete el.dataset.prevDisplay;
+    }
+  });
+  if (summaryEl) {
+    summaryEl.hidden = !visible;
+  }
+}
+
+function exitSummary(targetStepIndex) {
+  if (!isFinished) {
+    return;
+  }
+  isFinished = false;
+  setSummaryVisibility(false);
+  if (typeof targetStepIndex === "number") {
+    currentStepIndex = targetStepIndex;
+  }
 }
 
 function attachEvents() {
@@ -295,7 +338,13 @@ function finishWizard(reason) {
   isFinished = true;
   logClick(`Finished: ${reason}`);
 
-  const summary = document.createElement("section");
+  if (!summaryEl) {
+    summaryEl = document.createElement("section");
+    summaryEl.id = "summary";
+    contentEl.appendChild(summaryEl);
+  }
+  summaryEl.innerHTML = "";
+
   const title = document.createElement("h2");
   title.textContent = "Onboarding summary";
 
@@ -336,6 +385,12 @@ function finishWizard(reason) {
   feedbackInput.id = "feedback";
   feedbackInput.rows = 4;
 
+  const actionBar = document.createElement("nav");
+
+  const summaryBackBtn = document.createElement("button");
+  summaryBackBtn.type = "button";
+  summaryBackBtn.textContent = "Back";
+
   const submitBtn = document.createElement("button");
   submitBtn.type = "button";
   submitBtn.textContent = "Submit";
@@ -371,19 +426,26 @@ function finishWizard(reason) {
       });
   });
 
-  summary.append(
+  summaryBackBtn.addEventListener("click", () => {
+    logClick("Summary back");
+    const previousStep = Math.max(0, currentStepIndex - 1);
+    exitSummary(previousStep);
+    render();
+  });
+
+  actionBar.append(summaryBackBtn, submitBtn);
+
+  summaryEl.append(
     title,
     description,
     logTable,
     feedbackLabel,
     feedbackInput,
-    submitBtn,
+    actionBar,
     statusEl,
     disclaimer
   );
-
-  contentEl.innerHTML = "";
-  contentEl.appendChild(summary);
+  setSummaryVisibility(true);
 }
 
 function init() {

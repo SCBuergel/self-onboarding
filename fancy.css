@@ -117,7 +117,7 @@ header h2 {
 }
 
 #help-toggle {
-  margin-top: 16px;
+  margin-top: 0;
   border-radius: 999px;
 }
 

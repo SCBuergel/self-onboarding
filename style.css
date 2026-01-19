@@ -105,3 +105,21 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.step-item[data-state="completed"] {
+  border-color: black;
+  border-style: dashed;
+  background: #f7f7f7;
+}
+
+.step-item[data-state="current"] {
+  border-color: black;
+  border-width: 2px;
+  font-weight: 600;
+  background: white;
+}
+
+.step-item[data-state="upcoming"] {
+  border-color: transparent;
+  background: white;
+}

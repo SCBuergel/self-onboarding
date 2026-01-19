@@ -166,3 +166,19 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.step-item[data-state="upcoming"] {
+  opacity: 0.7;
+  background: linear-gradient(135deg, #fdfbfb, #ebedee);
+}
+
+.step-item[data-state="completed"] {
+  background: linear-gradient(135deg, #d4fc79, #96e6a1);
+}
+
+.step-item[data-state="current"] {
+  border-width: 4px;
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  box-shadow: 6px 6px 0 #101010;
+  transform: translateY(-2px);
+}
