@@ -1,0 +1,104 @@
+{
+  "version": "1.2.0",
+  "title": "Gnosis VPN Setup",
+  "steps": [
+    {
+      "id": "download",
+      "title": "Download the app",
+      "text": "Get Gnosis VPN from the official download page.",
+      "link": {
+        "label": "Open download page",
+        "url": "https://example.com/gnosis-vpn"
+      },
+      "help": {
+        "video": "https://video-hosting/install.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "install",
+      "title": "Install the app",
+      "text": "Follow the installer steps for your device.",
+      "help": {
+        "video": "https://video-hosting/install.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "launch",
+      "title": "Launch Gnosis VPN",
+      "text": "Open the app from your home screen or app drawer.",
+      "help": {
+        "video": "https://video-hosting/launch.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "account",
+      "title": "Create or import account",
+      "text": "Create a new account or import an existing one.",
+      "help": {
+        "video": "https://video-hosting/account.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "permissions",
+      "title": "Grant permissions",
+      "text": "Allow the VPN permission prompt so the app can create a secure tunnel.",
+      "help": {
+        "video": "https://video-hosting/permissions.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "profile",
+      "title": "Verify your profile",
+      "text": "Confirm your profile details and security settings.",
+      "help": {
+        "video": "https://video-hosting/profile.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "servers",
+      "title": "Choose a server",
+      "text": "Select a preferred server location.",
+      "help": {
+        "video": "https://video-hosting/servers.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "connect",
+      "title": "Connect to the VPN",
+      "text": "Tap connect to start the secure tunnel.",
+      "help": {
+        "video": "https://video-hosting/connect.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "verify",
+      "title": "Verify your connection",
+      "text": "Confirm that your IP address has changed.",
+      "link": {
+        "label": "Check your IP",
+        "url": "https://example.com/ip-check"
+      },
+      "help": {
+        "video": "https://video-hosting/verify.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "finish",
+      "title": "You are ready",
+      "text": "Your VPN is active. Keep the app running for protection.",
+      "help": {
+        "video": "https://video-hosting/finish.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    }
+  ]
+}

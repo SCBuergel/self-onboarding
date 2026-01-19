@@ -1,0 +1,159 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: black;
+  background: white;
+}
+
+#app {
+  display: flex;
+  min-height: 100vh;
+  gap: 24px;
+  padding: 24px;
+}
+
+aside {
+  width: 280px;
+  padding: 20px;
+  border: 1px solid black;
+  border-radius: 20px;
+}
+
+main {
+  flex: 1;
+  padding: 24px;
+  border: 1px solid black;
+  border-radius: 24px;
+  background: white;
+}
+
+#version-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid black;
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+
+#version-select {
+  border: none;
+  background: transparent;
+  font: inherit;
+  outline: none;
+}
+
+header h1 {
+  margin: 0 0 6px 0;
+  font-size: 24px;
+}
+
+header h2 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+#steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-item {
+  border: 1px solid black;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.step-item.step-upcoming {
+  border-style: dashed;
+  opacity: 0.6;
+}
+
+.step-item.step-completed {
+  border-style: solid;
+  background: white;
+}
+
+.step-item.step-current {
+  border-width: 2px;
+  font-weight: 600;
+  box-shadow: 4px 4px 0 black;
+}
+
+.step-item:hover {
+  transform: translateY(-1px);
+}
+
+.step-item:focus-visible {
+  outline: 2px solid black;
+  outline-offset: 2px;
+}
+
+#step-text {
+  margin-top: 6px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+#step-link,
+#support-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  border: 1px solid black;
+  border-radius: 999px;
+  padding: 6px 12px;
+  text-decoration: none;
+  color: black;
+}
+
+#help-toggle {
+  margin-top: 16px;
+  border-radius: 999px;
+}
+
+#help {
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid black;
+  border-radius: 18px;
+  background: white;
+}
+
+#video > * {
+  width: 100%;
+  max-width: 720px;
+  border-radius: 12px;
+  border: 1px solid black;
+}
+
+nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+button {
+  border: 1px solid black;
+  background: white;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

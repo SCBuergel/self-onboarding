@@ -1,4 +1,5 @@
 const stepsEl = document.getElementById("steps");
+const versionSelectEl = document.getElementById("version-select");
 const wizardTitleEl = document.getElementById("wizard-title");
 const stepTitleEl = document.getElementById("step-title");
 const stepTextEl = document.getElementById("step-text");
@@ -12,7 +13,7 @@ const nextBtn = document.getElementById("next");
 
 let config = null;
 let currentStepIndex = 0;
-let maxVisitedIndex = 0;
+let eventsAttached = false;
 
 function getVersionParam() {
   const params = new URLSearchParams(window.location.search);
@@ -55,19 +56,21 @@ function buildVideoNode(url) {
 function renderSteps() {
   stepsEl.innerHTML = "";
   config.steps.forEach((step, index) => {
-    const item = document.createElement("div");
-    item.className = "step";
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "step-item";
     item.textContent = `${index + 1}. ${step.title}`;
-    if (index === currentStepIndex) {
-      item.classList.add("active");
+    if (index < currentStepIndex) {
+      item.classList.add("step-completed");
+    } else if (index === currentStepIndex) {
+      item.classList.add("step-current");
+    } else {
+      item.classList.add("step-upcoming");
     }
-    if (index <= maxVisitedIndex) {
-      item.classList.add("visited");
-      item.addEventListener("click", () => {
-        currentStepIndex = index;
-        render();
-      });
-    }
+    item.addEventListener("click", () => {
+      currentStepIndex = index;
+      render();
+    });
     stepsEl.appendChild(item);
   });
 }
@@ -101,12 +104,15 @@ function renderStepContent(step) {
 }
 
 function render() {
-  maxVisitedIndex = Math.max(maxVisitedIndex, currentStepIndex);
   renderSteps();
   renderStepContent(config.steps[currentStepIndex]);
 }
 
 function attachEvents() {
+  if (eventsAttached) {
+    return;
+  }
+  eventsAttached = true;
   backBtn.addEventListener("click", () => {
     if (currentStepIndex > 0) {
       currentStepIndex -= 1;
@@ -138,27 +144,78 @@ function attachEvents() {
       }
     }
   });
+
+  versionSelectEl.addEventListener("change", () => {
+    const selected = versionSelectEl.value;
+    if (!selected) {
+      return;
+    }
+    loadVersion(selected, true);
+  });
 }
 
 function resolveVersion(versions, requested) {
   if (requested && versions.versions && versions.versions[requested]) {
     return requested;
   }
-  return versions.default;
+  return getLatestVersion(versions);
+}
+
+function getLatestVersion(versions) {
+  if (versions.default) {
+    return versions.default;
+  }
+  const keys = Object.keys(versions.versions || {});
+  return keys[0] || null;
+}
+
+function updateVersionOptions(versions) {
+  versionSelectEl.innerHTML = "";
+  Object.entries(versions.versions || {}).forEach(([version, label]) => {
+    const option = document.createElement("option");
+    option.value = version;
+    option.textContent = label ? `${version} — ${label}` : version;
+    versionSelectEl.appendChild(option);
+  });
+}
+
+function updateUrl(version) {
+  const url = new URL(window.location.href);
+  if (version) {
+    url.searchParams.set("v", version);
+  } else {
+    url.searchParams.delete("v");
+  }
+  window.history.replaceState({}, "", url);
+}
+
+function loadVersion(version, updateQueryParam) {
+  return fetchJson(`content/${version}.json`)
+    .then((loaded) => {
+      config = loaded;
+      currentStepIndex = 0;
+      render();
+      if (updateQueryParam) {
+        updateUrl(version);
+      }
+    })
+    .catch((err) => {
+      stepsEl.textContent = "Failed to load onboarding content.";
+      console.error(err);
+    });
 }
 
 function init() {
   fetchJson("content/versions.json")
     .then((versions) => {
-      const version = resolveVersion(versions, getVersionParam());
-      return fetchJson(`content/${version}.json`);
-    })
-    .then((loaded) => {
-      config = loaded;
-      currentStepIndex = 0;
-      maxVisitedIndex = 0;
+      updateVersionOptions(versions);
+      const requested = getVersionParam();
+      const version = resolveVersion(versions, requested);
+      if (versionSelectEl) {
+        versionSelectEl.value = version;
+      }
       attachEvents();
-      render();
+      return loadVersion(version, !requested);
     })
     .catch((err) => {
       stepsEl.textContent = "Failed to load onboarding content.";

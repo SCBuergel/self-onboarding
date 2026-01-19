@@ -25,24 +25,51 @@ main {
   padding: 24px;
 }
 
+#version-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#version-select {
+  border: 1px solid black;
+  background: white;
+  padding: 6px 8px;
+}
+
 #steps {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.step {
+.step-item {
   border: 1px solid transparent;
   padding: 8px;
   cursor: pointer;
+  text-align: left;
+  background: white;
 }
 
-.step.active {
-  border: 1px solid black;
-}
-
-.step.visited {
+.step-item.step-completed {
   border-color: black;
+  border-style: dashed;
+}
+
+.step-item.step-current {
+  border-color: black;
+  border-width: 2px;
+  font-weight: 600;
+}
+
+.step-item.step-upcoming {
+  border-color: transparent;
+}
+
+.step-item:focus-visible {
+  outline: 2px solid black;
+  outline-offset: 2px;
 }
 
 #step-link,
