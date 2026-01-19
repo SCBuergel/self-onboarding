@@ -1,0 +1,80 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: black;
+  background: white;
+}
+
+#app {
+  display: flex;
+  min-height: 100vh;
+}
+
+aside {
+  width: 260px;
+  border-right: 1px solid black;
+  padding: 16px;
+}
+
+main {
+  flex: 1;
+  padding: 24px;
+}
+
+#steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step {
+  border: 1px solid transparent;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.step.active {
+  border: 1px solid black;
+}
+
+.step.visited {
+  border-color: black;
+}
+
+#step-link,
+#support-link {
+  display: inline-block;
+  margin-top: 8px;
+}
+
+#help {
+  margin-top: 16px;
+  border: 1px solid black;
+  padding: 12px;
+}
+
+#video > * {
+  max-width: 100%;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+button {
+  border: 1px solid black;
+  background: white;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

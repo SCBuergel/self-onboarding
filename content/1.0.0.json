@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "title": "Gnosis VPN Setup",
+  "steps": [
+    {
+      "id": "install",
+      "title": "Install the app",
+      "text": "Download and install Gnosis VPN.",
+      "link": {
+        "label": "Download Gnosis VPN",
+        "url": "https://example.com/gnosis-vpn"
+      },
+      "help": {
+        "video": "https://video-hosting/install.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "account",
+      "title": "Create or import account",
+      "text": "Create a new account or import an existing one.",
+      "help": {
+        "video": "https://video-hosting/account.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    }
+  ]
+}

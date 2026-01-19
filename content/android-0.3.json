@@ -1,0 +1,28 @@
+{
+  "version": "android-0.3",
+  "title": "Gnosis VPN Setup (Android Beta)",
+  "steps": [
+    {
+      "id": "install",
+      "title": "Install the beta app",
+      "text": "Download and install the Android beta build.",
+      "link": {
+        "label": "Download beta APK",
+        "url": "https://example.com/android-beta"
+      },
+      "help": {
+        "video": "https://video-hosting/install.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    },
+    {
+      "id": "permissions",
+      "title": "Grant permissions",
+      "text": "Allow the VPN permission prompt so the app can create a secure tunnel.",
+      "help": {
+        "video": "https://video-hosting/permissions.mp4",
+        "support_url": "https://cal.com/gnosis-vpn-support"
+      }
+    }
+  ]
+}

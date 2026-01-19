@@ -1,0 +1,8 @@
+{
+  "default": "1.1.0",
+  "versions": {
+    "1.0.0": "Initial release",
+    "1.1.0": "Android improvements",
+    "android-0.3": "Legacy Android beta"
+  }
+}
