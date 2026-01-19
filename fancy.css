@@ -143,6 +143,7 @@ nav {
   gap: 10px;
   margin-top: 24px;
   flex-wrap: wrap;
+  align-items: stretch;
 }
 
 button {
@@ -156,6 +157,11 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+nav button {
+  flex: 1;
+  min-height: 56px;
 }
 
 textarea {
@@ -173,6 +179,23 @@ pre {
   border-radius: 12px;
   background: white;
   overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+th,
+td {
+  border: 1px solid black;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+thead {
+  background: white;
 }
 
 button:disabled {

@@ -101,6 +101,8 @@ function renderStepContent(step) {
     stepLinkEl.textContent = step.link.label || "Open link";
     stepLinkEl.hidden = false;
   } else {
+    stepLinkEl.removeAttribute("href");
+    stepLinkEl.textContent = "";
     stepLinkEl.hidden = true;
   }
 
@@ -299,10 +301,32 @@ function finishWizard(reason) {
 
   const description = document.createElement("p");
   description.textContent =
-    "Thanks for completing the flow. The log below will be submitted if you choose to send it.";
+    "Below is a summary of the steps you took and the buttons you clicked. This data will be submitted if you choose to send it.";
 
-  const logOutput = document.createElement("pre");
-  logOutput.textContent = JSON.stringify(clickLog, null, 2);
+  const logTable = document.createElement("table");
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+  ["Step", "Time", "Button"].forEach((label) => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  logTable.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  clickLog.forEach((entry) => {
+    const row = document.createElement("tr");
+    const stepCell = document.createElement("td");
+    stepCell.textContent = String(entry.step);
+    const timeCell = document.createElement("td");
+    timeCell.textContent = entry.time;
+    const buttonCell = document.createElement("td");
+    buttonCell.textContent = entry.button;
+    row.append(stepCell, timeCell, buttonCell);
+    tbody.appendChild(row);
+  });
+  logTable.appendChild(tbody);
 
   const feedbackLabel = document.createElement("label");
   feedbackLabel.textContent = "Additional context or feedback";
@@ -350,7 +374,7 @@ function finishWizard(reason) {
   summary.append(
     title,
     description,
-    logOutput,
+    logTable,
     feedbackLabel,
     feedbackInput,
     submitBtn,

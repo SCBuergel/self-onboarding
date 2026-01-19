@@ -1,5 +1,7 @@
 const stepsEl = document.getElementById("steps");
-const versionSelectEl = document.getElementById("version-select");
+const contentEl = document.getElementById("content");
+let versionPickerEl = document.getElementById("version-picker");
+let versionSelectEl = document.getElementById("version-select");
 const wizardTitleEl = document.getElementById("wizard-title");
 const stepTitleEl = document.getElementById("step-title");
 const stepTextEl = document.getElementById("step-text");
@@ -62,10 +64,13 @@ function renderSteps() {
     item.textContent = `${index + 1}. ${step.title}`;
     if (index < currentStepIndex) {
       item.classList.add("step-completed");
+      item.dataset.state = "completed";
     } else if (index === currentStepIndex) {
       item.classList.add("step-current");
+      item.dataset.state = "current";
     } else {
       item.classList.add("step-upcoming");
+      item.dataset.state = "upcoming";
     }
     item.addEventListener("click", () => {
       currentStepIndex = index;
@@ -85,6 +90,8 @@ function renderStepContent(step) {
     stepLinkEl.textContent = step.link.label || "Open link";
     stepLinkEl.hidden = false;
   } else {
+    stepLinkEl.removeAttribute("href");
+    stepLinkEl.textContent = "";
     stepLinkEl.hidden = true;
   }
 
@@ -145,13 +152,15 @@ function attachEvents() {
     }
   });
 
-  versionSelectEl.addEventListener("change", () => {
-    const selected = versionSelectEl.value;
-    if (!selected) {
-      return;
-    }
-    loadVersion(selected, true);
-  });
+  if (versionSelectEl) {
+    versionSelectEl.addEventListener("change", () => {
+      const selected = versionSelectEl.value;
+      if (!selected) {
+        return;
+      }
+      loadVersion(selected, true);
+    });
+  }
 }
 
 function resolveVersion(versions, requested) {
@@ -170,6 +179,9 @@ function getLatestVersion(versions) {
 }
 
 function updateVersionOptions(versions) {
+  if (!versionSelectEl) {
+    return;
+  }
   versionSelectEl.innerHTML = "";
   Object.entries(versions.versions || {}).forEach(([version, label]) => {
     const option = document.createElement("option");
@@ -195,6 +207,9 @@ function loadVersion(version, updateQueryParam) {
       config = loaded;
       currentStepIndex = 0;
       render();
+      if (versionSelectEl) {
+        versionSelectEl.value = version;
+      }
       if (updateQueryParam) {
         updateUrl(version);
       }
@@ -208,6 +223,7 @@ function loadVersion(version, updateQueryParam) {
 function init() {
   fetchJson("content/versions.json")
     .then((versions) => {
+      ensureVersionPicker();
       updateVersionOptions(versions);
       const requested = getVersionParam();
       const version = resolveVersion(versions, requested);
@@ -224,3 +240,18 @@ function init() {
 }
 
 init();
+
+function ensureVersionPicker() {
+  if (versionSelectEl || !contentEl) {
+    return;
+  }
+  versionPickerEl = document.createElement("div");
+  versionPickerEl.id = "version-picker";
+  const label = document.createElement("label");
+  label.htmlFor = "version-select";
+  label.textContent = "Version";
+  versionSelectEl = document.createElement("select");
+  versionSelectEl.id = "version-select";
+  versionPickerEl.append(label, versionSelectEl);
+  contentEl.insertBefore(versionPickerEl, contentEl.firstChild);
+}
