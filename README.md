@@ -2,6 +2,14 @@
 
 Static, versioned onboarding wizard for Gnosis VPN. No build step, no backend.
 
+## System overview
+
+This is a pure static SPA that loads JSON content per version and renders a
+linear onboarding flow in the browser. The UI is defined by HTML/CSS, while
+`app.js` handles version selection, step navigation, and optional help video
+embedding. Content changes are made by editing JSON files in `content/` and
+linking them in `content/versions.json`.
+
 ## Run locally
 
 Open `index.html` in a browser or serve the folder with any static server.
@@ -15,6 +23,12 @@ https://<host>/index.html?v=1.1.0
 ```
 
 Defaults and labels live in `content/versions.json`.
+
+## Frontend variants
+
+- `index.html` + `style.css`: minimal black/white baseline theme.
+- `fancy.html` + `fancy.css`: elegant rounded styling, still monochrome.
+- `crazy.html` + `crazy.css`: rainbow, maximal styling.
 
 ## Update workflow
 
