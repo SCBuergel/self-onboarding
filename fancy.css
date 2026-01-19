@@ -152,6 +152,10 @@ button {
   border-radius: 999px;
   cursor: pointer;
   font: inherit;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 textarea {

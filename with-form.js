@@ -14,7 +14,9 @@ const backBtn = document.getElementById("back");
 const nextBtn = document.getElementById("next");
 
 const SUBMIT_ENDPOINT = "https://example.com/api/onboarding-feedback";
-const STORAGE_KEY = "gnosis_onboarding_clicks";
+const HELP_INITIAL_LABEL = "I encountered a problem and need help";
+const HELP_CRITICAL_LABEL =
+  "I still have a critical problem and need to book a support call";
 
 let config = null;
 let currentStepIndex = 0;
@@ -102,8 +104,7 @@ function renderStepContent(step) {
     stepLinkEl.hidden = true;
   }
 
-  helpEl.hidden = true;
-  videoEl.innerHTML = "";
+  resetHelpState();
 
   if (step.help && step.help.support_url) {
     supportLinkEl.href = step.help.support_url;
@@ -160,13 +161,17 @@ function attachEvents() {
       finishWizard("critical_problem");
       return;
     }
-    const isHidden = helpEl.hidden;
-    helpEl.hidden = !isHidden;
-    if (isHidden && videoEl.children.length === 0) {
-      const videoNode = buildVideoNode(step.help.video);
-      if (videoNode) {
-        videoEl.appendChild(videoNode);
+    if (helpToggleEl.textContent === HELP_INITIAL_LABEL) {
+      helpToggleEl.textContent = HELP_CRITICAL_LABEL;
+      const isHidden = helpEl.hidden;
+      helpEl.hidden = !isHidden;
+      if (isHidden && videoEl.children.length === 0) {
+        const videoNode = buildVideoNode(step.help.video);
+        if (videoNode) {
+          videoEl.appendChild(videoNode);
+        }
       }
+      return;
     }
     finishWizard("critical_problem");
   });
@@ -279,7 +284,6 @@ function logClick(buttonLabel) {
     button: buttonLabel,
   };
   clickLog.push(entry);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(clickLog));
 }
 
 function finishWizard(reason) {
@@ -359,7 +363,7 @@ function finishWizard(reason) {
 }
 
 function init() {
-  clickLog = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  clickLog = [];
   fetchJson("content/versions.json")
     .then((versions) => {
       ensureVersionPicker();
@@ -379,3 +383,9 @@ function init() {
 }
 
 init();
+
+function resetHelpState() {
+  helpEl.hidden = true;
+  videoEl.innerHTML = "";
+  helpToggleEl.textContent = HELP_INITIAL_LABEL;
+}
