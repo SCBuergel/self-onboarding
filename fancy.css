@@ -107,15 +107,13 @@ header h2 {
 
 #step-link,
 #support-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  display: inline;
   margin-top: 10px;
-  border: 1px solid black;
-  border-radius: 999px;
-  padding: 6px 12px;
-  text-decoration: none;
+  text-decoration: underline;
   color: black;
+  border: none;
+  padding: 0;
+  background: none;
 }
 
 #help-toggle {
@@ -160,8 +158,12 @@ button {
 }
 
 nav button {
-  flex: 1;
   min-height: 56px;
+  height: 56px;
+  flex: 0 1 auto;
+  padding: 0 14px;
+  text-align: center;
+  line-height: 1.2;
 }
 
 textarea {
