@@ -223,6 +223,18 @@ function setupKeyboardAvoidance() {
   if (!window.visualViewport) {
     return;
   }
+  const scrollNoteIntoView = () => {
+    if (!noteInputEl || !chatLogEl) {
+      return;
+    }
+    const inputRect = noteInputEl.getBoundingClientRect();
+    const viewportHeight = window.visualViewport.height;
+    const bottomGap = Math.max(0, inputRect.bottom - viewportHeight + 16);
+    if (bottomGap <= 0) {
+      return;
+    }
+    chatLogEl.scrollTop += bottomGap;
+  };
   const updateOffset = () => {
     const viewport = window.visualViewport;
     const offset = Math.max(
@@ -230,6 +242,7 @@ function setupKeyboardAvoidance() {
       window.innerHeight - viewport.height - viewport.offsetTop
     );
     root.style.setProperty("--keyboard-offset", `${offset}px`);
+    scrollNoteIntoView();
   };
   window.visualViewport.addEventListener("resize", updateOffset);
   window.visualViewport.addEventListener("scroll", updateOffset);
@@ -454,6 +467,9 @@ function attachEvents() {
   if (noteInputEl) {
     noteInputEl.addEventListener("focus", () => {
       scrollChatToBottom();
+      requestAnimationFrame(() => {
+        noteInputEl.scrollIntoView({ block: "center", behavior: "smooth" });
+      });
     });
   }
 
