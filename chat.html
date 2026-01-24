@@ -304,15 +304,17 @@
       @media (max-width: 900px) {
         #app.chat-app {
           flex-direction: column;
-          padding: calc(1rem + env(safe-area-inset-top)) 1rem 1rem;
+          padding: calc(5px + env(safe-area-inset-top)) 5px 5px;
         }
 
         #overview {
           width: 100%;
+          box-shadow: none;
         }
 
         #overview-handle {
-          left: 0.25rem;
+          left: 5px;
+          box-shadow: none;
         }
 
         #version-picker {
@@ -326,6 +328,19 @@
 
         .message {
           max-width: 98%;
+          box-shadow: none;
+        }
+
+        .message.assistant {
+          background: transparent;
+        }
+
+        #content.chat-panel {
+          gap: 5px;
+        }
+
+        .note-composer {
+          margin-top: 0;
         }
       }
     </style>
