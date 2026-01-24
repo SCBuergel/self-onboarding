@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gnosis VPN Self-Onboarding</title>
+    <link rel="stylesheet" href="fancy.css" />
+    <style>
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
+        background: #f3f4f6;
+        color: #1b1f2a;
+        overflow: hidden;
+      }
+
+      #app.chat-app {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        box-sizing: border-box;
+        align-items: stretch;
+      }
+
+      #overview {
+        width: 260px;
+        background: #f3f4f6;
+        border-radius: 1rem;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      #overview header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+
+      #overview h2 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      #overview-close {
+        border: none;
+        background: #ffffff;
+        color: #1f2937;
+        border-radius: 999px;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        line-height: 1;
+      }
+
+      #steps {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+        text-align: left;
+      }
+
+      #steps .step-item {
+        text-align: left;
+        border-radius: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border: none;
+        background: #ffffff;
+        box-shadow: none;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 100%;
+      }
+
+      #steps .step-current {
+        background: #e5e7eb;
+        box-shadow: none;
+      }
+
+      #steps .step-upcoming,
+      #steps .step-completed,
+      #steps .step-item[data-state="upcoming"],
+      #steps .step-item[data-state="completed"] {
+        background: #ffffff;
+        border: none;
+        box-shadow: none;
+        opacity: 1;
+      }
+
+      #steps .step-item[data-state="current"] {
+        border: none;
+        box-shadow: none;
+      }
+
+      body.overview-collapsed #overview {
+        display: none;
+      }
+
+      body.overview-collapsed #steps {
+        display: none;
+      }
+
+      #content.chat-panel {
+        width: min(860px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        box-sizing: border-box;
+        position: relative;
+        min-height: 0;
+        background: #f3f4f6;
+        border: none;
+        box-shadow: none;
+      }
+
+      #overview-handle {
+        position: absolute;
+        left: -18px;
+        top: 1.5rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        border: none;
+        background: #ffffff;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      body.overview-collapsed #overview-handle {
+        display: inline-flex;
+      }
+
+      #version-picker {
+        align-self: flex-start;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0;
+        border: none;
+        background: transparent;
+      }
+
+      #version-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        border: none;
+        background: #ffffff;
+        border-radius: 999px;
+        padding: 0.45rem 0.9rem;
+        font: inherit;
+        outline: none;
+        box-shadow: none;
+      }
+
+      #chat-log {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+        min-height: 0;
+      }
+
+      .message {
+        max-width: 85%;
+        padding: 0.85rem 1rem;
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+      }
+
+      .message.assistant {
+        align-self: flex-start;
+      }
+
+      .message.user {
+        align-self: flex-end;
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      .message header h1 {
+        font-size: 1rem;
+        margin: 0 0 0.35rem;
+        color: #4b5563;
+      }
+
+      .message header h2 {
+        font-size: 1.1rem;
+        margin: 0 0 0.5rem;
+        display: none;
+      }
+
+      .message p {
+        margin: 0.5rem 0 0;
+        line-height: 1.5;
+      }
+
+      #help {
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e2e8f0;
+      }
+
+      .note-composer {
+        align-self: flex-end;
+        width: min(520px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .note-composer label {
+        font-size: 0.9rem;
+        color: #4b5563;
+      }
+
+      .note-input-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-end;
+      }
+
+      .note-input-row textarea {
+        flex: 1;
+        min-height: 70px;
+        resize: vertical;
+        border-radius: 0.75rem;
+        border: none;
+        padding: 0.6rem 0.75rem;
+        font: inherit;
+        background: #ffffff;
+      }
+
+      .note-input-row button {
+        border-radius: 999px;
+        padding: 0.55rem 0.9rem;
+        border: none;
+        background: #ffffff;
+      }
+
+      .message.user.has-edit {
+        position: relative;
+        padding-right: 3.25rem;
+      }
+
+      .message.user .edit-note {
+        position: absolute;
+        top: 0.45rem;
+        right: 0.6rem;
+        border: none;
+        background: rgba(255, 255, 255, 0.2);
+        color: inherit;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 999px;
+        cursor: pointer;
+      }
+
+      nav.chat-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: flex-end;
+      }
+
+      nav.chat-actions button {
+        border-radius: 999px;
+        padding: 0.6rem 1rem;
+        border: none;
+        background: #ffffff;
+        box-shadow: none;
+      }
+
+      @media (max-width: 900px) {
+        #app.chat-app {
+          flex-direction: column;
+          padding: 1rem;
+        }
+
+        #overview {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="chat-app">
+      <aside id="overview" aria-label="Onboarding overview">
+        <header>
+          <h2>Steps</h2>
+          <button id="overview-close" type="button" aria-label="Collapse overview">
+            ×
+          </button>
+        </header>
+        <div id="steps"></div>
+      </aside>
+      <main id="content" class="chat-panel">
+        <button id="overview-handle" type="button" aria-label="Open overview">
+          →
+        </button>
+        <div id="version-picker">
+          <select id="version-select"></select>
+        </div>
+
+        <div id="chat-log" aria-live="polite">
+          <div id="chat-current" class="message assistant">
+            <header>
+              <h1 id="wizard-title"></h1>
+              <h2 id="step-title"></h2>
+            </header>
+            <p id="step-text"></p>
+            <a id="step-link" target="_blank" rel="noopener noreferrer"></a>
+            <div id="help" hidden>
+              <div id="video"></div>
+              <a
+                id="support-link"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Schedule support call
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-composer" aria-label="Step notes">
+          <div class="note-input-row">
+            <textarea
+              id="note-input"
+              placeholder="Share any blockers, questions, or notes for this step."
+            ></textarea>
+          </div>
+        </div>
+
+        <nav class="chat-actions">
+          <button id="help-toggle" type="button">
+            I encountered a problem and need help
+          </button>
+          <button id="next" type="button">I'm ok to move on</button>
+        </nav>
+      </main>
+    </div>
+    <script src="with-form.js"></script>
+  </body>
+</html>

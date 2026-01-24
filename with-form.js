@@ -14,6 +14,11 @@ const videoEl = document.getElementById("video");
 const supportLinkEl = document.getElementById("support-link");
 const backBtn = document.getElementById("back");
 const nextBtn = document.getElementById("next");
+const chatLogEl = document.getElementById("chat-log");
+const chatCurrentEl = document.getElementById("chat-current");
+const overviewCloseEl = document.getElementById("overview-close");
+const overviewHandleEl = document.getElementById("overview-handle");
+const noteInputEl = document.getElementById("note-input");
 
 const SUBMIT_ENDPOINT = "https://example.com/api/onboarding-feedback";
 const HELP_INITIAL_LABEL = "I encountered a problem and need help";
@@ -26,6 +31,7 @@ let eventsAttached = false;
 let clickLog = [];
 let isFinished = false;
 let summaryEl = null;
+let stepNotes = [];
 
 function getVersionParam() {
   const params = new URLSearchParams(window.location.search);
@@ -65,6 +71,153 @@ function buildVideoNode(url) {
   return iframe;
 }
 
+function isChatLayout() {
+  return Boolean(chatLogEl && chatCurrentEl);
+}
+
+function stripIds(node) {
+  if (!node) {
+    return;
+  }
+  if (node.id) {
+    node.removeAttribute("id");
+  }
+  node.querySelectorAll("[id]").forEach((el) => {
+    el.removeAttribute("id");
+  });
+}
+
+function archiveCurrentChat() {
+  if (!isChatLayout()) {
+    return null;
+  }
+  const clone = chatCurrentEl.cloneNode(true);
+  stripIds(clone);
+  clone.classList.add("archived");
+  chatLogEl.insertBefore(clone, chatCurrentEl);
+  return clone;
+}
+
+function insertAfter(reference, node) {
+  if (!isChatLayout()) {
+    return;
+  }
+  if (!reference || !reference.parentNode) {
+    chatLogEl.insertBefore(node, chatCurrentEl);
+    return;
+  }
+  const next = reference.nextSibling;
+  if (next) {
+    chatLogEl.insertBefore(node, next);
+  } else {
+    chatLogEl.insertBefore(node, chatCurrentEl);
+  }
+}
+
+function appendUserChat(text, afterEl = null) {
+  if (!isChatLayout()) {
+    return;
+  }
+  const bubble = document.createElement("div");
+  bubble.className = "message user";
+  bubble.textContent = text;
+  insertAfter(afterEl, bubble);
+}
+
+function appendNoteBubble(text, stepIndex, afterEl = null) {
+  if (!isChatLayout()) {
+    return null;
+  }
+  const bubble = document.createElement("div");
+  bubble.className = "message user has-edit";
+  bubble.dataset.step = String(stepIndex);
+
+  const textEl = document.createElement("span");
+  textEl.className = "note-text";
+  textEl.textContent = text;
+
+  const editBtn = document.createElement("button");
+  editBtn.type = "button";
+  editBtn.className = "edit-note";
+  editBtn.textContent = "Edit";
+  editBtn.addEventListener("click", () => {
+    const current = textEl.textContent || "";
+    const next = window.prompt("Edit note", current);
+    if (next === null) {
+      return;
+    }
+    textEl.textContent = next.trim();
+    const step = Number(bubble.dataset.step);
+    if (!Number.isNaN(step)) {
+      stepNotes[step] = textEl.textContent;
+      syncNoteInputForStep();
+    }
+    scrollChatToBottom();
+  });
+
+  bubble.append(textEl, editBtn);
+  insertAfter(afterEl, bubble);
+  return bubble;
+}
+
+function captureChatAction(label) {
+  if (!label || isFinished || !isChatLayout()) {
+    return;
+  }
+  const noteText = noteInputEl ? noteInputEl.value.trim() : "";
+  if (noteText) {
+    stepNotes[currentStepIndex] = noteText;
+  }
+  const archivedStep = archiveCurrentChat();
+  let lastInserted = archivedStep;
+  if (noteText) {
+    lastInserted = appendNoteBubble(noteText, currentStepIndex, archivedStep);
+  }
+  appendUserChat(label, lastInserted);
+  scrollChatToBottom();
+}
+
+function resetChatHistory() {
+  if (!isChatLayout()) {
+    return;
+  }
+  chatLogEl.innerHTML = "";
+  chatLogEl.appendChild(chatCurrentEl);
+  chatCurrentEl.hidden = false;
+  if (navEl) {
+    navEl.hidden = false;
+  }
+  if (summaryEl) {
+    summaryEl.remove();
+    summaryEl = null;
+  }
+}
+
+function scrollChatToBottom() {
+  if (!isChatLayout()) {
+    return;
+  }
+  requestAnimationFrame(() => {
+    const lastBubble = chatLogEl.lastElementChild;
+    if (lastBubble) {
+      lastBubble.scrollIntoView({ block: "end", behavior: "smooth" });
+    }
+    chatLogEl.scrollTop = chatLogEl.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight);
+  });
+}
+
+function setOverviewCollapsed(collapsed) {
+  document.body.classList.toggle("overview-collapsed", collapsed);
+}
+
+function syncNoteInputForStep() {
+  if (!noteInputEl) {
+    return;
+  }
+  noteInputEl.value = stepNotes[currentStepIndex] || "";
+}
+
 function renderSteps() {
   stepsEl.innerHTML = "";
   config.steps.forEach((step, index) => {
@@ -96,8 +249,11 @@ function renderSteps() {
 
 function renderStepContent(step) {
   wizardTitleEl.textContent = config.title || "Gnosis VPN Setup";
-  stepTitleEl.textContent = step.title;
+  if (stepTitleEl) {
+    stepTitleEl.textContent = "";
+  }
   stepTextEl.textContent = step.text || "";
+  syncNoteInputForStep();
 
   if (step.link && step.link.url) {
     stepLinkEl.href = step.link.url;
@@ -118,8 +274,11 @@ function renderStepContent(step) {
     supportLinkEl.hidden = true;
   }
 
-  backBtn.disabled = currentStepIndex === 0;
+  if (backBtn) {
+    backBtn.disabled = currentStepIndex === 0;
+  }
   nextBtn.disabled = currentStepIndex >= config.steps.length && isFinished;
+  scrollChatToBottom();
 }
 
 function render() {
@@ -131,6 +290,9 @@ function render() {
 }
 
 function setSummaryVisibility(visible) {
+  if (isChatLayout()) {
+    return;
+  }
   const elements = [
     versionPickerEl,
     headerEl,
@@ -164,6 +326,18 @@ function exitSummary(targetStepIndex) {
     return;
   }
   isFinished = false;
+  if (isChatLayout()) {
+    if (summaryEl) {
+      summaryEl.remove();
+      summaryEl = null;
+    }
+    if (chatCurrentEl) {
+      chatCurrentEl.hidden = false;
+    }
+    if (navEl) {
+      navEl.hidden = false;
+    }
+  }
   setSummaryVisibility(false);
   if (typeof targetStepIndex === "number") {
     currentStepIndex = targetStepIndex;
@@ -175,25 +349,31 @@ function attachEvents() {
     return;
   }
   eventsAttached = true;
-  backBtn.addEventListener("click", () => {
-    if (currentStepIndex > 0 && !isFinished) {
-      logClick(backBtn.textContent);
-      currentStepIndex -= 1;
-      render();
-    }
-  });
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      if (currentStepIndex > 0 && !isFinished) {
+        logClick(backBtn.textContent);
+        captureChatAction(backBtn.textContent);
+        currentStepIndex -= 1;
+        render();
+      }
+    });
+  }
 
   nextBtn.addEventListener("click", () => {
     if (isFinished) {
       return;
     }
     logClick(nextBtn.textContent);
+    captureChatAction(nextBtn.textContent);
     if (currentStepIndex >= config.steps.length - 1) {
       finishWizard("completed");
+      scrollChatToBottom();
       return;
     }
     currentStepIndex += 1;
     render();
+    scrollChatToBottom();
   });
 
   helpToggleEl.addEventListener("click", () => {
@@ -201,6 +381,7 @@ function attachEvents() {
       return;
     }
     logClick(helpToggleEl.textContent);
+    captureChatAction(helpToggleEl.textContent);
     const step = config.steps[currentStepIndex];
     if (!step.help) {
       finishWizard("critical_problem");
@@ -216,9 +397,11 @@ function attachEvents() {
           videoEl.appendChild(videoNode);
         }
       }
+      scrollChatToBottom();
       return;
     }
     finishWizard("critical_problem");
+    scrollChatToBottom();
   });
 
   supportLinkEl.addEventListener("click", () => {
@@ -235,6 +418,19 @@ function attachEvents() {
       loadVersion(selected, true);
     });
   }
+
+  if (overviewCloseEl) {
+    overviewCloseEl.addEventListener("click", () => {
+      setOverviewCollapsed(true);
+    });
+  }
+
+  if (overviewHandleEl) {
+    overviewHandleEl.addEventListener("click", () => {
+      setOverviewCollapsed(false);
+    });
+  }
+
 }
 
 function resolveVersion(versions, requested) {
@@ -281,6 +477,8 @@ function loadVersion(version, updateQueryParam) {
       config = loaded;
       currentStepIndex = 0;
       isFinished = false;
+      stepNotes = new Array(config.steps.length).fill("");
+      resetChatHistory();
       render();
       if (versionSelectEl) {
         versionSelectEl.value = version;
@@ -339,9 +537,14 @@ function finishWizard(reason) {
   logClick(`Finished: ${reason}`);
 
   if (!summaryEl) {
-    summaryEl = document.createElement("section");
+    summaryEl = document.createElement(isChatLayout() ? "div" : "section");
     summaryEl.id = "summary";
-    contentEl.appendChild(summaryEl);
+    if (isChatLayout()) {
+      summaryEl.className = "message assistant";
+      chatLogEl.appendChild(summaryEl);
+    } else {
+      contentEl.appendChild(summaryEl);
+    }
   }
   summaryEl.innerHTML = "";
 
@@ -355,7 +558,7 @@ function finishWizard(reason) {
   const logTable = document.createElement("table");
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
-  ["Step", "Time", "Button"].forEach((label) => {
+  ["Step", "Time", "Button", "Notes"].forEach((label) => {
     const th = document.createElement("th");
     th.textContent = label;
     headerRow.appendChild(th);
@@ -367,12 +570,17 @@ function finishWizard(reason) {
   clickLog.forEach((entry) => {
     const row = document.createElement("tr");
     const stepCell = document.createElement("td");
-    stepCell.textContent = String(entry.step);
+    const stepTitle = config?.steps?.[entry.step - 1]?.title || "";
+    stepCell.textContent = stepTitle
+      ? `${entry.step}. ${stepTitle}`
+      : String(entry.step);
     const timeCell = document.createElement("td");
     timeCell.textContent = entry.time;
     const buttonCell = document.createElement("td");
     buttonCell.textContent = entry.button;
-    row.append(stepCell, timeCell, buttonCell);
+    const notesCell = document.createElement("td");
+    notesCell.textContent = stepNotes[entry.step - 1] || "";
+    row.append(stepCell, timeCell, buttonCell, notesCell);
     tbody.appendChild(row);
   });
   logTable.appendChild(tbody);
@@ -386,10 +594,6 @@ function finishWizard(reason) {
   feedbackInput.rows = 4;
 
   const actionBar = document.createElement("nav");
-
-  const summaryBackBtn = document.createElement("button");
-  summaryBackBtn.type = "button";
-  summaryBackBtn.textContent = "Back";
 
   const submitBtn = document.createElement("button");
   submitBtn.type = "button";
@@ -407,6 +611,7 @@ function finishWizard(reason) {
       version: config?.version,
       reason,
       log: clickLog,
+      notes: stepNotes,
       feedback: feedbackInput.value,
     };
     statusEl.textContent = "Submitting...";
@@ -426,14 +631,7 @@ function finishWizard(reason) {
       });
   });
 
-  summaryBackBtn.addEventListener("click", () => {
-    logClick("Summary back");
-    const previousStep = Math.max(0, currentStepIndex - 1);
-    exitSummary(previousStep);
-    render();
-  });
-
-  actionBar.append(summaryBackBtn, submitBtn);
+  actionBar.append(submitBtn);
 
   summaryEl.append(
     title,
@@ -445,11 +643,23 @@ function finishWizard(reason) {
     statusEl,
     disclaimer
   );
+  if (isChatLayout()) {
+    if (chatCurrentEl) {
+      chatCurrentEl.hidden = true;
+    }
+    if (navEl) {
+      navEl.hidden = true;
+    }
+    scrollChatToBottom();
+    return;
+  }
   setSummaryVisibility(true);
 }
 
 function init() {
   clickLog = [];
+  const shouldCollapseOverview = window.matchMedia("(max-width: 900px)").matches;
+  setOverviewCollapsed(shouldCollapseOverview);
   fetchJson("content/versions.json")
     .then((versions) => {
       ensureVersionPicker();
