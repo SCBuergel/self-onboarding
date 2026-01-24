@@ -127,6 +127,7 @@
         background: #f3f4f6;
         border: none;
         box-shadow: none;
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
       }
 
       #overview-handle {
@@ -342,6 +343,7 @@
         #content.chat-panel {
           gap: 0;
           padding: 0;
+          padding-bottom: calc(5px + env(safe-area-inset-bottom) + var(--keyboard-offset, 0px));
         }
 
         .note-composer {

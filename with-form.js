@@ -218,6 +218,24 @@ function syncNoteInputForStep() {
   noteInputEl.value = stepNotes[currentStepIndex] || "";
 }
 
+function setupKeyboardAvoidance() {
+  const root = document.documentElement;
+  if (!window.visualViewport) {
+    return;
+  }
+  const updateOffset = () => {
+    const viewport = window.visualViewport;
+    const offset = Math.max(
+      0,
+      window.innerHeight - viewport.height - viewport.offsetTop
+    );
+    root.style.setProperty("--keyboard-offset", `${offset}px`);
+  };
+  window.visualViewport.addEventListener("resize", updateOffset);
+  window.visualViewport.addEventListener("scroll", updateOffset);
+  updateOffset();
+}
+
 function renderSteps() {
   stepsEl.innerHTML = "";
   config.steps.forEach((step, index) => {
@@ -430,6 +448,12 @@ function attachEvents() {
   if (overviewHandleEl) {
     overviewHandleEl.addEventListener("click", () => {
       setOverviewCollapsed(false);
+    });
+  }
+
+  if (noteInputEl) {
+    noteInputEl.addEventListener("focus", () => {
+      scrollChatToBottom();
     });
   }
 
@@ -662,6 +686,7 @@ function init() {
   clickLog = [];
   const shouldCollapseOverview = window.matchMedia("(max-width: 900px)").matches;
   setOverviewCollapsed(shouldCollapseOverview);
+  setupKeyboardAvoidance();
   fetchJson("content/versions.json")
     .then((versions) => {
       ensureVersionPicker();
