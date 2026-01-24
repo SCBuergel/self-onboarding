@@ -248,9 +248,11 @@ function renderSteps() {
 }
 
 function renderStepContent(step) {
-  wizardTitleEl.textContent = config.title || "Gnosis VPN Setup";
+  if (wizardTitleEl) {
+    wizardTitleEl.textContent = "";
+  }
   if (stepTitleEl) {
-    stepTitleEl.textContent = "";
+    stepTitleEl.textContent = step.title || "";
   }
   stepTextEl.textContent = step.text || "";
   syncNoteInputForStep();
