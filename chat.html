@@ -19,11 +19,12 @@
       }
 
       #app.chat-app {
-        height: 100vh;
+        height: 100dvh;
+        min-height: 100svh;
         display: flex;
         justify-content: center;
         gap: 1.5rem;
-        padding: 1.5rem;
+        padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem 1.5rem;
         box-sizing: border-box;
         align-items: stretch;
       }
@@ -295,11 +296,15 @@
       @media (max-width: 900px) {
         #app.chat-app {
           flex-direction: column;
-          padding: 1rem;
+          padding: calc(1rem + env(safe-area-inset-top)) 1rem 1rem;
         }
 
         #overview {
           width: 100%;
+        }
+
+        #overview-handle {
+          left: 0.5rem;
         }
       }
     </style>
