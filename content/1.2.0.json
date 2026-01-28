@@ -1,11 +1,13 @@
 {
   "version": "1.2.0",
   "title": "Gnosis VPN Setup",
+  "requiredPlaceholders": ["host.secretToken"],
   "steps": [
     {
       "id": "welcome",
       "title": "Welcome to the Gnosis VPN self-onboarding guide",
-      "text": "Welcome to the Gnosis VPN self-onboarding. This guide will walk you step by step through setting up and using Gnosis VPN. It is a privacy-respecting web app and does not track you by default. On each step, you can continue with “I’m ok to move on”. If something does not work or feels unclear, use “I encountered a problem and need help” to see additional guidance, including a short help video. You can optionally opt in to saving your progress and feedback on our servers to help us improve the product. If you do, we minimize collected data and protect it carefully. Details are explained in our privacy policy. You are in control at every step.",
+      "text": "Welcome to the Gnosis VPN self-onboarding. \n\n This guide will walk you step by step through setting up and using Gnosis VPN. It is a privacy-respecting web app and does not track you by default. On each step, you can continue with “I’m ok to move on”. If something does not work or feels unclear, use “I encountered a problem and need help” to see additional guidance, including a short help video. You can optionally opt in to saving your progress and feedback on our servers to help us improve the product. If you do, we minimize collected data and protect it carefully. Details are explained in our privacy policy. You are in control at every step.\n\nYour secret token is {{host.secretToken}}.",
+      "recordDataA": true,
       "link": {
         "label": "Privacy Policy",
         "url": "https://example.com/gnosis-vpn"
@@ -21,7 +23,7 @@
       "text": "Get Gnosis VPN from the official download page.",
       "link": {
         "label": "Open download page",
-        "url": "https://example.com/gnosis-vpn"
+        "url": "https://example.com/gnosis-vpn?token={{host.secretToken}}"
       },
       "help": {
         "video": "https://video-hosting/install.mp4",

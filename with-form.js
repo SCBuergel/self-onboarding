@@ -7,6 +7,7 @@ const wizardTitleEl = document.getElementById("wizard-title");
 const stepTitleEl = document.getElementById("step-title");
 const stepTextEl = document.getElementById("step-text");
 const stepLinkEl = document.getElementById("step-link");
+const dataOptInBtn = document.getElementById("data-opt-in");
 const navEl = contentEl.querySelector("nav");
 const helpToggleEl = document.getElementById("help-toggle");
 const helpEl = document.getElementById("help");
@@ -24,6 +25,10 @@ const SUBMIT_ENDPOINT = "https://example.com/api/onboarding-feedback";
 const HELP_INITIAL_LABEL = "I encountered a problem and need help";
 const HELP_CRITICAL_LABEL =
   "I still have a critical problem and need to book a support call";
+const PLACEHOLDER_PATTERN = /\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g;
+const RESERVED_PLACEHOLDER_KEYS = new Set(["__proto__", "prototype", "constructor"]);
+const OPT_IN_MESSAGE =
+  "Thanks for opting in. We'll only record data needed to improve onboarding.";
 
 let config = null;
 let currentStepIndex = 0;
@@ -32,10 +37,17 @@ let clickLog = [];
 let isFinished = false;
 let summaryEl = null;
 let stepNotes = [];
+let resolvedPlaceholders = {};
+let missingPlaceholders = [];
 
 function getVersionParam() {
   const params = new URLSearchParams(window.location.search);
   return params.get("v");
+}
+
+function getSecretTokenParam() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("secretToken");
 }
 
 function fetchJson(path) {
@@ -73,6 +85,90 @@ function buildVideoNode(url) {
 
 function isChatLayout() {
   return Boolean(chatLogEl && chatCurrentEl);
+}
+
+function setHostContextFromQuery() {
+  const secretToken = getSecretTokenParam();
+  if (!secretToken) {
+    return;
+  }
+  if (!window.host || typeof window.host !== "object") {
+    window.host = {};
+  }
+  window.host.secretToken = secretToken;
+}
+
+function isSafePlaceholderKey(key) {
+  return !RESERVED_PLACEHOLDER_KEYS.has(key);
+}
+
+function resolvePlaceholderPath(path) {
+  if (!path || typeof path !== "string") {
+    return undefined;
+  }
+  const parts = path.split(".");
+  let current = window;
+  for (const part of parts) {
+    if (!isSafePlaceholderKey(part)) {
+      return undefined;
+    }
+    if (current == null || !(part in current)) {
+      return undefined;
+    }
+    current = current[part];
+  }
+  if (current === undefined || current === null) {
+    return undefined;
+  }
+  return String(current);
+}
+
+function buildRequiredPlaceholders(requiredPlaceholders) {
+  resolvedPlaceholders = {};
+  missingPlaceholders = [];
+  (requiredPlaceholders || []).forEach((path) => {
+    const value = resolvePlaceholderPath(path);
+    if (value === undefined) {
+      missingPlaceholders.push(path);
+    } else {
+      resolvedPlaceholders[path] = value;
+    }
+  });
+  if (missingPlaceholders.length > 0) {
+    console.warn(
+      `Missing required placeholders: ${missingPlaceholders.join(", ")}`
+    );
+  }
+}
+
+function replacePlaceholders(value) {
+  if (typeof value !== "string") {
+    return value;
+  }
+  return value.replace(PLACEHOLDER_PATTERN, (match, path) => {
+    if (resolvedPlaceholders[path] !== undefined) {
+      return resolvedPlaceholders[path];
+    }
+    const resolved = resolvePlaceholderPath(path);
+    return resolved === undefined ? match : resolved;
+  });
+}
+
+function renderTextWithLineBreaks(element, text) {
+  if (!element) {
+    return;
+  }
+  element.innerHTML = "";
+  if (!text) {
+    return;
+  }
+  const lines = text.split(/\n/);
+  lines.forEach((line, index) => {
+    if (index > 0) {
+      element.appendChild(document.createElement("br"));
+    }
+    element.appendChild(document.createTextNode(line));
+  });
 }
 
 function stripIds(node) {
@@ -285,11 +381,12 @@ function renderStepContent(step) {
   if (stepTitleEl) {
     stepTitleEl.textContent = step.title || "";
   }
-  stepTextEl.textContent = step.text || "";
+  const renderedText = replacePlaceholders(step.text || "");
+  renderTextWithLineBreaks(stepTextEl, renderedText);
   syncNoteInputForStep();
 
   if (step.link && step.link.url) {
-    stepLinkEl.href = step.link.url;
+    stepLinkEl.href = replacePlaceholders(step.link.url);
     stepLinkEl.textContent = step.link.label || "Open link";
     stepLinkEl.hidden = false;
   } else {
@@ -298,10 +395,17 @@ function renderStepContent(step) {
     stepLinkEl.hidden = true;
   }
 
+  if (dataOptInBtn) {
+    const shouldShowOptIn = step.recordDataA === true;
+    dataOptInBtn.hidden = !shouldShowOptIn;
+    dataOptInBtn.style.display = shouldShowOptIn ? "" : "none";
+    dataOptInBtn.disabled = !shouldShowOptIn;
+  }
+
   resetHelpState();
 
   if (step.help && step.help.support_url) {
-    supportLinkEl.href = step.help.support_url;
+    supportLinkEl.href = replacePlaceholders(step.help.support_url);
     supportLinkEl.hidden = false;
   } else {
     supportLinkEl.hidden = true;
@@ -331,6 +435,7 @@ function setSummaryVisibility(visible) {
     headerEl,
     stepTextEl,
     stepLinkEl,
+    dataOptInBtn,
     navEl,
     helpEl,
   ];
@@ -425,7 +530,7 @@ function attachEvents() {
       const isHidden = helpEl.hidden;
       helpEl.hidden = !isHidden;
       if (isHidden && videoEl.children.length === 0) {
-        const videoNode = buildVideoNode(step.help.video);
+        const videoNode = buildVideoNode(replacePlaceholders(step.help.video));
         if (videoNode) {
           videoEl.appendChild(videoNode);
         }
@@ -473,6 +578,12 @@ function attachEvents() {
     });
   }
 
+  if (dataOptInBtn) {
+    dataOptInBtn.addEventListener("click", () => {
+      window.alert(OPT_IN_MESSAGE);
+    });
+  }
+
 }
 
 function resolveVersion(versions, requested) {
@@ -517,6 +628,7 @@ function loadVersion(version, updateQueryParam) {
   return fetchJson(`content/${version}.json`)
     .then((loaded) => {
       config = loaded;
+      buildRequiredPlaceholders(config.requiredPlaceholders);
       currentStepIndex = 0;
       isFinished = false;
       stepNotes = new Array(config.steps.length).fill("");
@@ -703,6 +815,7 @@ function init() {
   const shouldCollapseOverview = window.matchMedia("(max-width: 900px)").matches;
   setOverviewCollapsed(shouldCollapseOverview);
   setupKeyboardAvoidance();
+  setHostContextFromQuery();
   fetchJson("content/versions.json")
     .then((versions) => {
       ensureVersionPicker();
