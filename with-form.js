@@ -396,7 +396,7 @@ function renderStepContent(step) {
   }
 
   if (dataOptInBtn) {
-    const shouldShowOptIn = step.recordDataA === true;
+    const shouldShowOptIn = step.recordData === true;
     dataOptInBtn.hidden = !shouldShowOptIn;
     dataOptInBtn.style.display = shouldShowOptIn ? "" : "none";
     dataOptInBtn.disabled = !shouldShowOptIn;

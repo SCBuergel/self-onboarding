@@ -7,7 +7,7 @@
       "id": "welcome",
       "title": "Welcome to the Gnosis VPN self-onboarding guide",
       "text": "Welcome to the Gnosis VPN self-onboarding. \n\n This guide will walk you step by step through setting up and using Gnosis VPN. It is a privacy-respecting web app and does not track you by default. On each step, you can continue with “I’m ok to move on”. If something does not work or feels unclear, use “I encountered a problem and need help” to see additional guidance, including a short help video. You can optionally opt in to saving your progress and feedback on our servers to help us improve the product. If you do, we minimize collected data and protect it carefully. Details are explained in our privacy policy. You are in control at every step.\n\nYour secret token is {{host.secretToken}}.",
-      "recordDataA": true,
+      "recordData": true,
       "link": {
         "label": "Privacy Policy",
         "url": "https://example.com/gnosis-vpn"
@@ -20,7 +20,7 @@
     {
       "id": "download",
       "title": "Download the app",
-      "text": "Get Gnosis VPN from the official download page.",
+      "text": "Next, you will download the Gnosis VPN installer.\n\nThis is a one-time installer process that will install the VPN on your system and prepare everything needed to connect securely.\n\nGnosis VPN is currently available for macOS and Linux. Support for Windows and Android is planned for later this year.\n\nOnce the download is complete, run the installer to continue with the setup.",
       "link": {
         "label": "Open download page",
         "url": "https://example.com/gnosis-vpn?token={{host.secretToken}}"
@@ -50,8 +50,12 @@
     },
     {
       "id": "account",
-      "title": "Create or import account",
-      "text": "Create a new account or import an existing one.",
+      "title": "Fund your account.",
+      "text": "Next, you need to fund your Gnosis VPN account.\n\nGnosis VPN requires wxHOPR tokens on Gnosis Chain to operate. These tokens are used to pay for VPN usage.\n\nYou can fund the account yourself by transferring wxHOPR to your personal funding address, or you can use our provided funding tool to acquire and fund it directly.\n\nYour personal funding token is {{host.secretToken}}.",
+      "link": {
+        "label": "Gnosis VPN Funding Tool for testers",
+        "url": "https://example.com/gnosis-vpn?token={{host.secretToken}}"
+      },
       "help": {
         "video": "https://video-hosting/account.mp4",
         "support_url": "https://cal.com/gnosis-vpn-support"
